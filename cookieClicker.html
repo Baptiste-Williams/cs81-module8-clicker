@@ -2,38 +2,206 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Baptiste’s Cookie Clicker</title>
+  <title>Baptiste’s Multi-Clicker</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    .theme-section {
+      display: none;
+      margin-top: 20px;
+    }
+    .active {
+      display: block;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 18px;
+    }
+    input {
+      margin: 5px;
+      padding: 5px;
+    }
+    #duiOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: red;
+      color: white;
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      padding-top: 100px;
+      z-index: 9999;
+    }
+  </style>
 </head>
 <body>
-  <h1>🍪 Cookie Clicker</h1>
-  <button id="cookieBtn">Click Me!</button>
-  <p>Clicks: <span id="counter">0</span></p>
-  <p id="message"></p>
+  <h1>🎯 Choose Your Clicker Theme</h1>
+  <button onclick="showTheme('cookie')">🍪 Cookie Clicker</button>
+  <button onclick="showTheme('alcohol')">🍸 Alcohol Tracker</button>
+
+  <!-- 🚨 DUI Warning Overlay -->
+  <div id="duiOverlay">☠️🚓🚓 CALL A RIDE OR GET A DUI ☠️<br>🚨🚨🚨</div>
+  
+
+  <!-- Cookie Clicker Section -->
+  <div id="cookie" class="theme-section">
+    <h2>🍪 Cookie Clicker</h2>
+    <button id="chocoBtn">Chocolate Chip</button>
+    <button id="oatmealBtn">Oatmeal</button>
+    <button id="sugarBtn">Sugar</button>
+    <p>Chocolate Chip Clicks: <span id="chocoCounter">0</span></p>
+    <p>Oatmeal Clicks: <span id="oatmealCounter">0</span></p>
+    <p>Sugar Clicks: <span id="sugarCounter">0</span></p>
+    <p id="cookieMessage"></p>
+  </div>
+
+  <!-- Alcohol Tracker Section -->
+  <div id="alcohol" class="theme-section">
+    <h2>🍸 Alcohol Tracker</h2>
+    <button id="beerBtn">Beer</button>
+    <button id="shotBtn">Shot</button>
+    <button id="mixedBtn">Mixed Drink</button>
+    <p>Beers: <span id="beerCounter">0</span></p>
+    <p>Shots: <span id="shotCounter">0</span></p>
+    <p>Mixed Drinks: <span id="mixedCounter">0</span></p>
+    <p>Total Drinks: <span id="totalDrinks">0</span></p>
+    <p id="alcoholMessage"></p>
+
+    <h3>🧬 Estimate Your BAC</h3>
+    <label>Gender:
+      <select id="gender">
+        <option value="male">Male</option>
+        <option value="female">Female</option>
+      </select>
+    </label><br>
+    <label>Weight (lbs): <input type="number" id="weight"></label><br>
+    <label>Hours Since First Drink: <input type="number" id="hours"></label><br>
+    <button onclick="calculateBAC()">Calculate BAC</button>
+    <p id="bacResult"></p>
+  </div>
 
   <script>
-    // JavaScript will go here
-    
-    let count = 0;
-const button = document.getElementById("cookieBtn");
-const counterDisplay = document.getElementById("counter");
-const messageDisplay = document.getElementById("message");
+    function showTheme(theme) {
+      document.getElementById('cookie').classList.remove('active');
+      document.getElementById('alcohol').classList.remove('active');
+      document.getElementById(theme).classList.add('active');
+    }
 
-button.addEventListener("click", function() {
-  count++;
-  counterDisplay.textContent = count;
+    // Cookie Clicker Logic
+    let chocoCount = 0, oatmealCount = 0, sugarCount = 0;
+    const chocoBtn = document.getElementById("chocoBtn");
+    const oatmealBtn = document.getElementById("oatmealBtn");
+    const sugarBtn = document.getElementById("sugarBtn");
+    const chocoCounter = document.getElementById("chocoCounter");
+    const oatmealCounter = document.getElementById("oatmealCounter");
+    const sugarCounter = document.getElementById("sugarCounter");
+    const cookieMessage = document.getElementById("cookieMessage");
 
-  if (count === 10) {
-    messageDisplay.textContent = "You’re just getting started!";
-  } else if (count === 25) {
-    messageDisplay.textContent = "Wow, that’s a lot of cookies!";
-  } else if (count === 50) {
-    messageDisplay.textContent = "Are you still clicking?";
-  } else if (count === 100) {
-    messageDisplay.textContent = "You win! Maybe take a break.";
-  }
-});
+    chocoBtn.addEventListener("click", function() {
+      chocoCount++;
+      chocoCounter.textContent = chocoCount;
+      if (chocoCount === 10) cookieMessage.textContent = "Chocolate overload!";
+    });
 
+    oatmealBtn.addEventListener("click", function() {
+      oatmealCount++;
+      oatmealCounter.textContent = oatmealCount;
+      if (oatmealCount === 10) cookieMessage.textContent = "Oatmeal power!";
+    });
+
+    sugarBtn.addEventListener("click", function() {
+      sugarCount++;
+      sugarCounter.textContent = sugarCount;
+      if (sugarCount === 10) cookieMessage.textContent = "Sugar rush!";
+    });
+
+    // Alcohol Tracker Logic
+    let beerCount = 0, shotCount = 0, mixedCount = 0;
+    const beerBtn = document.getElementById("beerBtn");
+    const shotBtn = document.getElementById("shotBtn");
+    const mixedBtn = document.getElementById("mixedBtn");
+    const beerCounter = document.getElementById("beerCounter");
+    const shotCounter = document.getElementById("shotCounter");
+    const mixedCounter = document.getElementById("mixedCounter");
+    const totalDrinksDisplay = document.getElementById("totalDrinks");
+    const alcoholMessage = document.getElementById("alcoholMessage");
+
+    function updateTotalDrinks() {
+      const total = beerCount + shotCount + mixedCount;
+      totalDrinksDisplay.textContent = total;
+
+      if (total >= 20) {
+        alcoholMessage.textContent = "You've had 20 drinks. Please call an Uber and don't drink and drive 🚗";
+
+        const overlay = document.getElementById("duiOverlay");
+        overlay.style.display = "block";
+
+        const siren = document.getElementById("sirenAudio");
+        siren.play();
+
+        let flashes = 0;
+        const flashInterval = setInterval(() => {
+          overlay.style.backgroundColor = (flashes % 2 === 0) ? "blue" : "red";
+          flashes++;
+          if (flashes > 10) {
+            clearInterval(flashInterval);
+            overlay.style.backgroundColor = "red";
+          }
+        }, 300);
+      }
+    }
+
+    beerBtn.addEventListener("click", function() {
+      beerCount++;
+      beerCounter.textContent = beerCount;
+      if (beerCount === 5) alcoholMessage.textContent = "That's a lot of beer 🍺";
+      updateTotalDrinks();
+    });
+
+    shotBtn.addEventListener("click", function() {
+      shotCount++;
+      shotCounter.textContent = shotCount;
+      if (shotCount === 3) alcoholMessage.textContent = "Feeling bold 🥃";
+      updateTotalDrinks();
+    });
+
+    mixedBtn.addEventListener("click", function() {
+      mixedCount++;
+      mixedCounter.textContent = mixedCount;
+      if (mixedCount === 4) alcoholMessage.textContent = "Mixing it up 🍹";
+      updateTotalDrinks();
+    });
+
+    // BAC Calculator
+    function calculateBAC() {
+      const gender = document.getElementById("gender").value;
+      const weight = parseFloat(document.getElementById("weight").value);
+      const hours = parseFloat(document.getElementById("hours").value);
+      const totalDrinks = beerCount + shotCount + mixedCount;
+
+      if (isNaN(weight) || isNaN(hours)) {
+        document.getElementById("bacResult").textContent = "Please enter valid weight and hours.";
+        return;
+      }
+
+      const r = gender === "male" ? 0.68 : 0.55;
+      const gramsAlcohol = totalDrinks * 14;
+      const bodyWeightGrams = weight * 453.592;
+      let bac = (gramsAlcohol / (bodyWeightGrams * r)) * 100;
+      bac -= (0.015 * hours);
+      bac = Math.max(0, bac);
+
+      document.getElementById("bacResult").textContent = `Estimated BAC: ${bac.toFixed(3)}%`;
+    }
+
+    // Show Cookie theme by default
+    showTheme('cookie');
   </script>
 </body>
-</html>
 
